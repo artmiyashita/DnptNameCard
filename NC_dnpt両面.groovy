@@ -23,7 +23,28 @@ def paragraphBuilder(recordList,partsList,positionY,linespan,lineheight){
     }
   }
 }
-
+// 字取りメソッド
+def jidoriBuilder(jidori,sei,mei,pSei,pMei,span,positionX){
+  j = jidori.size() - 1;
+  for(i=0; i<jidori.size(); i++){
+    if(sei.length() == jidori[i][0] && mei.length() == jidori[i][1]){
+      //合致パターンの記録
+      jidoriId = i;
+      //姓名間のスペースの倍率変更
+      smspan = span * jidori[i][2];
+      //姓名にスペース追加
+      pSei.param.letterSpacing = jidori[i][3];
+      pMei.param.letterSpacing = jidori[i][4];
+      break;
+    }else{
+      smspan = span * jidori[j][2];
+      pSei.param.letterSpacing = jidori[j][3];
+      pMei.param.letterSpacing = jidori[j][4];
+    }
+  }
+  pSei.transform.translateX = positionX;
+  pMei.transform.translateX = positionX + pSei.boundBox.width + smspan;
+}
 
 //独自の刺し込み処理
 def myInjectionOne(cassette, record, labelList, imageTable) {
@@ -45,6 +66,28 @@ def myInjectionOne(cassette, record, labelList, imageTable) {
   //表面の処理ここから
   if(omote != null){
     //表面のパーツ操作スクリプト
+    //デフォルト設定
+    sei = record['姓'] ;
+    mei = record['名'] ;
+    pSei = getPartsByLabel('姓', 1, cassette) ;
+    pMei = getPartsByLabel('名', 1, cassette) ;
+    //字取り定義
+    positionX = 30;//mm
+    def span = 5;//全角スペース1個分(mm)
+    //Jidori＝[姓文字数、名文字数、姓名間全角スペース比、姓スペース(pt)、名スペース(pt)]
+    def jidori = [
+      [1,1,2,0,0],
+      [1,2,1,0,3.54],
+      [1,3,0.5,0,0],
+      [2,1,1,3.54,0],
+      [2,2,0.5,0,0],
+      [2,3,0.5,0,0],
+      [3,1,0.5,0,0],
+      [3,2,0.5,0,0],
+      [3,3,0.5,0,0],
+      [0,0,0.5,0,0]
+      ];
+    jidoriBuilder(jidori,sei,mei,pSei,pMei,span,positionX);
 
     //肩書配置
     class1 = record['肩書き1'];
