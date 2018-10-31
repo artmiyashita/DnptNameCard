@@ -108,12 +108,12 @@ def myInjectionOne(cassette, record, labelList, imageTable) {
     postnum1 = record['郵便番号1'];
     address1 = record['住所1'];
     pAddressUnit1 = getPartsByLabel('住所1結合',1,cassette);
-    pAddressUnit1.param.text = postnum1 + ' ' + address1;
+    pAddressUnit1.param.text = '〒' + postnum1 + ' ' + address1;
 
     postnum2 = record['郵便番号2'];
     address2 = record['住所2'];
     pAddressUnit2 = getPartsByLabel('住所2結合',1,cassette);
-    pAddressUnit2.param.text = postnum2 + ' ' + address2;
+    pAddressUnit2.param.text = '〒' + postnum2 + ' ' + address2;
 
     //電話番号配置
     pTel1 = getPartsByLabel('電話番号1',1,cassette);
@@ -123,6 +123,13 @@ def myInjectionOne(cassette, record, labelList, imageTable) {
     pTel2 = getPartsByLabel('電話番号2',1,cassette);
     pTel2Type = getPartsByLabel('電話2種別',1,cassette);
     pTel2Type.transform.translateX = pTel2.transform.translateX + pTel2.boundBox.width;
+
+    //FAX配置
+    pFax1 = getPartsByLabel('FAX番号1',1,cassette);
+    pFax1.transform.translateX = 60;
+
+    pFax2 = getPartsByLabel('FAX番号2',1,cassette);
+    pFax2.transform.translateX = 60;
 
     //名称定義
     addressType = record['名称1'];
