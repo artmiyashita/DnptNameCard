@@ -51,6 +51,38 @@ def myInjectionOne(cassette, record, labelList, imageTable) {
 
   def additionalLabelList = ['名称2','名称3','住所1結合','住所2結合'];
 
+  class1 = record['肩書き1'];
+  class2 = record['肩書き2'];
+  class3 = record['肩書き3'];
+  sei = record['姓'] ;
+  mei = record['名'] ;
+
+  addressType1 = record['名称1'];
+  postnum1 = record['郵便番号1'];
+  address1 = record['住所1'];
+  address12 = record['住所1-2'];
+  tel1 = record['電話番号1'];
+  fax1 = record['FAX番号1'];
+
+  postnum2 = record['郵便番号2'];
+  address2 = record['住所2'];
+  address3 = record['住所3'];
+  tel2 = record['電話番号2'];
+  fax2 = record['FAX番号2']
+  email = record['E-mail'];
+
+  //住所結合
+  if(address12.size()>0){
+    address12 = ' ' + address12;
+  }
+  record['住所1結合'] = postnum1 + ' ' + address1 + address12;
+
+  if(address3.size()>0){
+    address3 = ' ' + address3;
+  }
+  record['住所2結合'] = postnum2 + ' ' + address2 + address3;
+
+
   //基本関数
   labelList.each {
     injectionOneParts(cassette, it , record, imageTable);
@@ -67,34 +99,23 @@ def myInjectionOne(cassette, record, labelList, imageTable) {
   if(omote != null){
     //表面のパーツ操作スクリプト
     //デフォルト設定
-    class1 = record['肩書き1'];
-    class2 = record['肩書き2'];
-    class3 = record['肩書き3'];
-    sei = record['姓'] ;
-    mei = record['名'] ;
-    addressType = record['名称1'];
-    postnum1 = record['郵便番号1'];
-    address1 = record['住所1'];
-    address12 = record['住所1-2'];
-    tel1 = record['電話1'];
-    postnum2 = record['郵便番号2'];
-    address2 = record['住所2'];
-    address3 = record['住所3'];
-    tel2 = record['電話2'];
-    email = record['E-mail'];
-
     pClass1 = getPartsByLabel('肩書き1',1,cassette);
     pClass2 = getPartsByLabel('肩書き2',1,cassette);
     pClass3 = getPartsByLabel('肩書き3',1,cassette);
     pSei = getPartsByLabel('姓', 1, cassette) ;
     pMei = getPartsByLabel('名', 1, cassette) ;
+
     pAddressType1 = getPartsByLabel('名称1',1,cassette);
     pAddressType2 = getPartsByLabel('名称2',1,cassette);
     pAddressType3 = getPartsByLabel('名称3',1,cassette);
+
+    pAddressUnit1 = getPartsByLabel('住所1結合',1,cassette);
     pAddress12 = getPartsByLabel('住所1-2',1,cassette);
     pTel1 = getPartsByLabel('電話番号1',1,cassette);
     pTel1Type = getPartsByLabel('電話1種別',1,cassette);
     pFax1 = getPartsByLabel('FAX番号1',1,cassette);
+
+    pAddressUnit2 = getPartsByLabel('住所2結合',1,cassette);
     pTel2 = getPartsByLabel('電話番号2',1,cassette);
     pTel2Type = getPartsByLabel('電話2種別',1,cassette);
     pFax2 = getPartsByLabel('FAX番号2',1,cassette);
@@ -126,17 +147,12 @@ def myInjectionOne(cassette, record, labelList, imageTable) {
     positionY = pSei.transform.translateY - pSei.boundBox.height - 1.5;
     paragraphBuilder(recordList,partsList,positionY,linespan,lineheight);
 
-    //住所結合
-    pAddressUnit1 = getPartsByLabel('住所1結合',1,cassette);
-    pAddressUnit1.param.text = '〒' + postnum1 + ' ' + address1 + ' ' + address12;
-    pAddressUnit2 = getPartsByLabel('住所2結合',1,cassette);
-    pAddressUnit2.param.text = '〒' + postnum2 + ' ' + address2 + ' ' + address3;
-
     //住所配置
-    recordList = [address1,address12,tel1,address2,tel2,email];
-    partsList = [pAddressUnit1,pAddress12,pTel1,pAddressUnit2,pTel2,pEmail];
+    pAddress12.param.text = '';
+    recordList = [addressType1,address1,tel1,address2,tel2,email];
+    partsList = [pAddressType1,pAddressUnit1,pTel1,pAddressUnit2,pTel2,pEmail];
     linespan = 0;
-    lineheight = 3.18;
+    lineheight = 2.75;
     positionY = 55 - 7.68;
     paragraphBuilder(recordList,partsList,positionY,linespan,lineheight);
 
@@ -153,7 +169,7 @@ def myInjectionOne(cassette, record, labelList, imageTable) {
     pFax2.transform.translateY = pTel2.transform.translateY;
 
     //名称定義
-    switch(addressType){
+    switch(addressType1){
       case '京都駐在':
         pAddressType1.param.text = '大日本印刷(株)京都駐在';
         pAddressType2.param.text = '';
@@ -179,6 +195,14 @@ def myInjectionOne(cassette, record, labelList, imageTable) {
         pAddressType2.param.text = '';
         pAddressType3.param.text = '';
       break;
+    }
+
+    //非表示処理
+    if(tel1==''){
+      pTel1Type.setDisplay('none');
+    }
+    if(tel2==''){
+      pTel2Type.setDisplay('none');
     }
 
   }
