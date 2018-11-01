@@ -67,10 +67,39 @@ def myInjectionOne(cassette, record, labelList, imageTable) {
   if(omote != null){
     //表面のパーツ操作スクリプト
     //デフォルト設定
+    class1 = record['肩書き1'];
+    class2 = record['肩書き2'];
+    class3 = record['肩書き3'];
     sei = record['姓'] ;
     mei = record['名'] ;
+    addressType = record['名称1'];
+    postnum1 = record['郵便番号1'];
+    address1 = record['住所1'];
+    address12 = record['住所1-2'];
+    tel1 = record['電話1'];
+    postnum2 = record['郵便番号2'];
+    address2 = record['住所2'];
+    address3 = record['住所3'];
+    tel2 = record['電話2'];
+    email = record['E-mail'];
+
+    pClass1 = getPartsByLabel('肩書き1',1,cassette);
+    pClass2 = getPartsByLabel('肩書き2',1,cassette);
+    pClass3 = getPartsByLabel('肩書き3',1,cassette);
     pSei = getPartsByLabel('姓', 1, cassette) ;
     pMei = getPartsByLabel('名', 1, cassette) ;
+    pAddressType1 = getPartsByLabel('名称1',1,cassette);
+    pAddressType2 = getPartsByLabel('名称2',1,cassette);
+    pAddressType3 = getPartsByLabel('名称3',1,cassette);
+    pAddress12 = getPartsByLabel('住所1-2',1,cassette);
+    pTel1 = getPartsByLabel('電話番号1',1,cassette);
+    pTel1Type = getPartsByLabel('電話1種別',1,cassette);
+    pFax1 = getPartsByLabel('FAX番号1',1,cassette);
+    pTel2 = getPartsByLabel('電話番号2',1,cassette);
+    pTel2Type = getPartsByLabel('電話2種別',1,cassette);
+    pFax2 = getPartsByLabel('FAX番号2',1,cassette);
+    pEmail = getPartsByLabel('E-mail',1,cassette);
+
     //字取り定義
     positionX = 30;//mm
     def span = 5;//全角スペース1個分(mm)
@@ -90,52 +119,40 @@ def myInjectionOne(cassette, record, labelList, imageTable) {
     jidoriBuilder(jidori,sei,mei,pSei,pMei,span,positionX);
 
     //肩書配置
-    class1 = record['肩書き1'];
-    class2 = record['肩書き2'];
-    class3 = record['肩書き3'];
     recordList = [class1,class2,class3];
-    pLastName = getPartsByLabel('姓',1,cassette);
-    pClass1 = getPartsByLabel('肩書き1',1,cassette);
-    pClass2 = getPartsByLabel('肩書き2',1,cassette);
-    pClass3 = getPartsByLabel('肩書き3',1,cassette);
     partsList = [pClass1,pClass2,pClass3];
     linespan = 0;
     lineheight = 2.82;
-    positionY = pLastName.transform.translateY - pLastName.boundBox.height - 1.5;
+    positionY = pSei.transform.translateY - pSei.boundBox.height - 1.5;
     paragraphBuilder(recordList,partsList,positionY,linespan,lineheight);
 
     //住所結合
-    postnum1 = record['郵便番号1'];
-    address1 = record['住所1'];
     pAddressUnit1 = getPartsByLabel('住所1結合',1,cassette);
-    pAddressUnit1.param.text = '〒' + postnum1 + ' ' + address1;
-
-    postnum2 = record['郵便番号2'];
-    address2 = record['住所2'];
+    pAddressUnit1.param.text = '〒' + postnum1 + ' ' + address1 + ' ' + address12;
     pAddressUnit2 = getPartsByLabel('住所2結合',1,cassette);
-    pAddressUnit2.param.text = '〒' + postnum2 + ' ' + address2;
+    pAddressUnit2.param.text = '〒' + postnum2 + ' ' + address2 + ' ' + address3;
+
+    //住所配置
+    recordList = [address1,address12,tel1,address2,tel2,email];
+    partsList = [pAddressUnit1,pAddress12,pTel1,pAddressUnit2,pTel2,pEmail];
+    linespan = 0;
+    lineheight = 3.18;
+    positionY = 55 - 7.68;
+    paragraphBuilder(recordList,partsList,positionY,linespan,lineheight);
 
     //電話番号配置
-    pTel1 = getPartsByLabel('電話番号1',1,cassette);
-    pTel1Type = getPartsByLabel('電話1種別',1,cassette);
     pTel1Type.transform.translateX = pTel1.transform.translateX + pTel1.boundBox.width;
-
-    pTel2 = getPartsByLabel('電話番号2',1,cassette);
-    pTel2Type = getPartsByLabel('電話2種別',1,cassette);
+    pTel1Type.transform.translateY = pTel1.transform.translateY;
     pTel2Type.transform.translateX = pTel2.transform.translateX + pTel2.boundBox.width;
+    pTel2Type.transform.translateY = pTel2.transform.translateY;
 
     //FAX配置
-    pFax1 = getPartsByLabel('FAX番号1',1,cassette);
     pFax1.transform.translateX = 60;
-
-    pFax2 = getPartsByLabel('FAX番号2',1,cassette);
+    pFax1.transform.translateY = pTel1.transform.translateY;
     pFax2.transform.translateX = 60;
+    pFax2.transform.translateY = pTel2.transform.translateY;
 
     //名称定義
-    addressType = record['名称1'];
-    pAddressType1 = getPartsByLabel('名称1',1,cassette);
-    pAddressType2 = getPartsByLabel('名称2',1,cassette);
-    pAddressType3 = getPartsByLabel('名称3',1,cassette);
     switch(addressType){
       case '京都駐在':
         pAddressType1.param.text = '大日本印刷(株)京都駐在';
