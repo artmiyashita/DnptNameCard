@@ -23,6 +23,7 @@ def paragraphBuilder(recordList,partsList,positionY,linespan,lineheight){
     }
   }
 }
+
 // 字取りメソッド
 def jidoriBuilder(jidori,sei,mei,pSei,pMei,span,positionX){
   j = jidori.size() - 1;
@@ -45,6 +46,53 @@ def jidoriBuilder(jidori,sei,mei,pSei,pMei,span,positionX){
   pSei.transform.translateX = positionX;
   pMei.transform.translateX = positionX + pSei.boundBox.width + smspan;
 }
+
+//ルビ生成メソッド
+//jidoriNo=姓の場合:3,名の場合:4で変数を渡す
+def rubyMaker(pNameRuby,nameRuby,pName,searchWord,rubySpan,rubySize,rubyFont,jidori,jidoriId,jidoriNo){
+  pNameRuby.param.size = rubySize;
+  pNameRuby.param.font = rubyFont;
+  foundIndex = nameRuby.indexOf(searchWord);
+  if (foundIndex < 0){
+    //姓ルビ(センター)配置
+    if(nameRuby){
+      pNameRuby.editReferencePoint('center-center',keepReferencePointPosition = false);
+      pNameRuby.transform.translateX = pName.transform.translateX + pName.boundBox.width / 2;
+      pNameRuby.param.maxWidth = pName.boundBox.width;
+      pNameRuby.transform.translateY = pName.transform.translateY - rubySpan;
+    }
+  } else {
+    //姓ルビ(モノルビ)配置
+    //姓ルビ(モノルビ)を区切り文字”/”で分解、配列に追加
+    def nameRubyList = [];
+    while (foundIndex >= 0){
+      nameRubyList.push(nameRuby.substring(0, foundIndex));
+      nameRuby = nameRuby.substring(foundIndex+1);
+      foundIndex = nameRuby.indexOf(searchWord);
+    }
+    nameRubyList.push(nameRuby);
+    //姓ルビ(モノルビ)間の距離を算出
+    def a = pName.param.size;
+    def b = rubySize;
+    def c = jidori[jidoriId][jidoriNo];
+    def n = nameRubyList.size();
+    def nameRubySpan = [];
+    nameRubySpan[0] = (a - (b * nameRubyList[0].size()))/2;
+    for (i=1; i<n; i++){
+      nameRubySpan[i] = c + (2 * a - (b * (nameRubyList[i-1].size() + nameRubyList[i].size())))/2;
+    }
+    //姓ルビ(モノルビ)テキストの生成と配置
+    def nameRubyText = '';
+    for (i=0; i<n ; i++){
+      nameRubyText += '<font size="' + nameRubySpan[i] + 'pt">　</font>' + nameRubyList[i];
+    }
+    pNameRuby.param.text = '<p>' + nameRubyText + '</p>';
+    pNameRuby.transform.translateX = pName.transform.translateX;
+    pNameRuby.transform.translateY = pName.transform.translateY - rubySpan;
+  }
+  pNameRuby;
+}
+
 
 //独自の刺し込み処理
 def myInjectionOne(cassette, record, labelList, imageTable) {
@@ -145,6 +193,16 @@ def myInjectionOne(cassette, record, labelList, imageTable) {
       ];
     jidoriBuilder(jidori,sei,mei,pSei,pMei,span,positionX);
 
+    //ルビの設定
+    def rubySize = 5;//ルビの文字サイズ指定(pt)
+    def rubyFont = 'FOT-ロダン Pro M';//ルビのフォント
+    def rubySpan = -2;//ルビと氏名の距離
+    searchWord = '/';
+    //姓ルビの関数
+    pSeiRuby = rubyMaker(pSeiRuby,seiruby,pSei,searchWord,rubySpan,rubySize,rubyFont,jidori,jidoriId,3)
+    //名ルビの関数
+    pMeiRuby = rubyMaker(pMeiRuby,meiruby,pMei,searchWord,rubySpan,rubySize,rubyFont,jidori,jidoriId,4)
+
     //肩書配置
     recordList = [class1,class2,class3];
     partsList = [pClass1,pClass2,pClass3];
@@ -152,7 +210,7 @@ def myInjectionOne(cassette, record, labelList, imageTable) {
     lineheight = 2.82;
     positionY = pSei.transform.translateY - pSei.boundBox.height - 1.5;
     paragraphBuilder(recordList,partsList,positionY,linespan,lineheight);
-    pClass4.transform.translateY = pMeiRuby.transform.translateY + 1;
+    pClass4.transform.translateY = pMeiRuby.transform.translateY + 0.5;
 
     //住所配置
     pAddress12.param.text = '';
