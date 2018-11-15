@@ -114,12 +114,14 @@ def myInjectionOne(cassette, record, labelList, imageTable) {
   address12 = record['住所1-2'];
   tel1 = record['電話番号1'];
   fax1 = record['FAX番号1'];
+  tel1unit = tel1 + fax1;
 
   postnum2 = record['郵便番号2'];
   address2 = record['住所2'];
   address3 = record['住所3'];
   tel2 = record['電話番号2'];
   fax2 = record['FAX番号2']
+  tel2unit = tel2 + fax2;
   email = record['E-mail'];
 
   //住所結合
@@ -173,6 +175,7 @@ def myInjectionOne(cassette, record, labelList, imageTable) {
     pTel2 = getPartsByLabel('電話番号2',1,cassette);
     pTel2Type = getPartsByLabel('電話2種別',1,cassette);
     pFax2 = getPartsByLabel('FAX番号2',1,cassette);
+
     pEmail = getPartsByLabel('E-mail',1,cassette);
 
     //字取り定義
@@ -214,7 +217,7 @@ def myInjectionOne(cassette, record, labelList, imageTable) {
 
     //住所配置
     pAddress12.param.text = '';
-    recordList = [addressType1,address1,tel1,address2,tel2,email];
+    recordList = [addressType1,address1,tel1,address2,tel2unit,email];
     partsList = [pAddressType1,pAddressUnit1,pTel1,pAddressUnit2,pTel2,pEmail];
     linespan = 0;
     lineheight = 2.75;
@@ -268,6 +271,12 @@ def myInjectionOne(cassette, record, labelList, imageTable) {
     }
     if(tel2==''){
       pTel2Type.setDisplay('none');
+    }
+    if(fax1==''){
+      pFax1.setDisplay('none');
+    }
+    if(fax2==''){
+      pFax2.setDisplay('none');
     }
 
   }
