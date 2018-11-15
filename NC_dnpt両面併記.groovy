@@ -97,7 +97,7 @@ def rubyMaker(pNameRuby,nameRuby,pName,searchWord,rubySpan,rubySize,rubyFont,jid
 //独自の刺し込み処理
 def myInjectionOne(cassette, record, labelList, imageTable) {
 
-  def additionalLabelList = ['名称2','名称3','住所1結合','住所2結合'];
+  def additionalLabelList = ['名称2','名称3','住所1結合','住所2結合','電話番号A','電話番号B','電話番号C','電話番号D'];
 
   class1 = record['肩書き1'];
   class2 = record['肩書き2'];
@@ -125,16 +125,25 @@ def myInjectionOne(cassette, record, labelList, imageTable) {
   email = record['E-mail'];
 
   //住所結合
-  if(address12.size()>0){
-    address12 = ' ' + address12;
+  record['住所1結合'] = postnum1 + ' ' + address1;
+  if(addressType1 != "なし"){
+    if(address12.size()>0){
+      address12 = ' ' + address12;
+    }
+    record['住所1結合'] = record['住所1結合'] + address12;
   }
-  record['住所1結合'] = postnum1 + ' ' + address1 + address12;
 
-  if(address3.size()>0){
-    address3 = ' ' + address3;
+  if(addressType1 != "なし"){
+    if(address3.size()>0){
+      address3 = ' ' + address3;
+    }
+    record['住所2結合'] = postnum2 + ' ' + address2 + address3;
   }
-  record['住所2結合'] = postnum2 + ' ' + address2 + address3;
 
+  record['電話番号A'] = record['電話番号1'];
+  record['電話番号B'] = record['FAX番号1'];
+  record['電話番号C'] = record['電話番号2'];
+  record['電話番号D'] = record['FAX番号2'];
 
   //基本関数
   labelList.each {
@@ -167,15 +176,15 @@ def myInjectionOne(cassette, record, labelList, imageTable) {
 
     pAddressUnit1 = getPartsByLabel('住所1結合',1,cassette);
     pAddress12 = getPartsByLabel('住所1-2',1,cassette);
-    pTel1 = getPartsByLabel('電話番号1',1,cassette);
-    pTel1Type = getPartsByLabel('電話1種別',1,cassette);
-    pFax1 = getPartsByLabel('FAX番号1',1,cassette);
-
     pAddressUnit2 = getPartsByLabel('住所2結合',1,cassette);
-    pTel2 = getPartsByLabel('電話番号2',1,cassette);
-    pTel2Type = getPartsByLabel('電話2種別',1,cassette);
-    pFax2 = getPartsByLabel('FAX番号2',1,cassette);
 
+    pTel1 = getPartsByLabel('電話番号A',1,cassette);
+    pTel1Type = getPartsByLabel('電話1種別',1,cassette);
+    pFax1 = getPartsByLabel('電話番号B',1,cassette);
+    pTel2 = getPartsByLabel('電話番号C',1,cassette);
+    pTel2Type = getPartsByLabel('電話2種別',1,cassette);
+    pFax2 = getPartsByLabel('電話番号D',1,cassette);
+    
     pEmail = getPartsByLabel('E-mail',1,cassette);
 
     //字取り定義
@@ -215,27 +224,6 @@ def myInjectionOne(cassette, record, labelList, imageTable) {
     paragraphBuilder(recordList,partsList,positionY,linespan,lineheight);
     pClass4.transform.translateY = pMeiRuby.transform.translateY + 0.5;
 
-    //住所配置
-    pAddress12.param.text = '';
-    recordList = [addressType1,address1,tel1,address2,tel2unit,email];
-    partsList = [pAddressType1,pAddressUnit1,pTel1,pAddressUnit2,pTel2,pEmail];
-    linespan = 0;
-    lineheight = 2.75;
-    positionY = 55 - 7.68;
-    paragraphBuilder(recordList,partsList,positionY,linespan,lineheight);
-
-    //電話番号配置
-    pTel1Type.transform.translateX = pTel1.transform.translateX + pTel1.boundBox.width;
-    pTel1Type.transform.translateY = pTel1.transform.translateY;
-    pTel2Type.transform.translateX = pTel2.transform.translateX + pTel2.boundBox.width;
-    pTel2Type.transform.translateY = pTel2.transform.translateY;
-
-    //FAX配置
-    pFax1.transform.translateX = 60;
-    pFax1.transform.translateY = pTel1.transform.translateY;
-    pFax2.transform.translateX = 60;
-    pFax2.transform.translateY = pTel2.transform.translateY;
-
     //名称定義
     switch(addressType1){
       case '京都駐在':
@@ -265,11 +253,45 @@ def myInjectionOne(cassette, record, labelList, imageTable) {
       break;
     }
 
+    //住所配置
+    if(addressType1 == "なし"){
+      pAddressUnit2.setDisplay('none');
+      recordList = [addressType1,address1,address12,tel1,tel2unit,email];
+      partsList = [pAddressType1,pAddressUnit1,pAddress12,pTel1,pTel2,pEmail];
+      linespan = 0;
+      lineheight = 2.75;
+      positionY = 55 - 7.68;
+      paragraphBuilder(recordList,partsList,positionY,linespan,lineheight);
+    }else{
+      pAddress12.param.text = '';
+      recordList = [addressType1,address1,tel1,address2,tel2unit,email];
+      partsList = [pAddressType1,pAddressUnit1,pTel1,pAddressUnit2,pTel2,pEmail];
+      linespan = 0;
+      lineheight = 2.75;
+      positionY = 55 - 7.68;
+      paragraphBuilder(recordList,partsList,positionY,linespan,lineheight);
+    }
+
+    //電話番号配置
+    pTel1Type.transform.translateX = pTel1.transform.translateX + pTel1.boundBox.width;
+    pTel1Type.transform.translateY = pTel1.transform.translateY;
+    pTel2Type.transform.translateX = pTel2.transform.translateX + pTel2.boundBox.width;
+    pTel2Type.transform.translateY = pTel2.transform.translateY;
+
+    //FAX配置
+    pFax1.transform.translateX = 60;
+    pFax1.transform.translateY = pTel1.transform.translateY;
+    pFax2.transform.translateX = 60;
+    pFax2.transform.translateY = pTel2.transform.translateY;
+
+
     //非表示処理
     if(tel1==''){
+      pTel1.setDisplay('none');
       pTel1Type.setDisplay('none');
     }
     if(tel2==''){
+      pTel2.setDisplay('none');
       pTel2Type.setDisplay('none');
     }
     if(fax1==''){
