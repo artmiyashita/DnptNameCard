@@ -56,7 +56,7 @@ def rubyMaker(pNameRuby,nameRuby,pName,searchWord,rubySpan,rubySize,rubyFont,jid
   if (foundIndex < 0){
     //姓ルビ(センター)配置
     if(nameRuby){
-      pNameRuby.editReferencePoint('center-center',keepReferencePointPosition = false);
+      pNameRuby.editReferencePoint('lower-center',keepReferencePointPosition = false);
       pNameRuby.transform.translateX = pName.transform.translateX + pName.boundBox.width / 2;
       pNameRuby.param.maxWidth = pName.boundBox.width;
       pNameRuby.transform.translateY = pName.transform.translateY - rubySpan;
@@ -87,6 +87,7 @@ def rubyMaker(pNameRuby,nameRuby,pName,searchWord,rubySpan,rubySize,rubyFont,jid
       nameRubyText += '<font size="' + nameRubySpan[i] + 'pt">　</font>' + nameRubyList[i];
     }
     pNameRuby.param.text = '<p>' + nameRubyText + '</p>';
+    pNameRuby.editReferencePoint('lower-left',keepReferencePointPosition = false);
     pNameRuby.transform.translateX = pName.transform.translateX;
     pNameRuby.transform.translateY = pName.transform.translateY - rubySpan;
   }
@@ -124,37 +125,34 @@ def myInjectionOne(cassette, record, labelList, imageTable) {
   email = record['E-mail'];
 
   if(addressType1 == "なし"){
+    //行数判定用電話結合
     tel1unit = tel1 + tel2;
     tel2unit = fax1 + fax2;
+    //住所結合
+    record['住所1結合'] = postnum1 + ' ' + address1;
+    //電話番号の配置
+    record['電話番号A'] = 'TEL:' + tel1;
+    record['電話番号B'] = '    ' + tel2;//フォント次第でずれる可能性あり
+    record['電話番号C'] = 'FAX:' + fax1;
+    record['電話番号D'] = 'FAX:' + fax2;
+
   } else {
+    //行数判定用電話結合
     tel1unit = tel1 + fax1;
     tel2unit = tel2 + fax2;
     if(tel1 == "" && mobile != ""){
       tel1unit = mobile + fax1;
     }
-  }
-
-
-  //住所結合
-  record['住所1結合'] = postnum1 + ' ' + address1;
-  record['住所2結合'] = postnum2 + ' ' + address2;
-
-  if(addressType1 != "なし"){
+    //住所結合
+    record['住所1結合'] = postnum1 + ' ' + address1;
     if(address12.size()>0){
       record['住所1結合'] = record['住所1結合'] + ' ' + address12;
     }
+    record['住所2結合'] = postnum2 + ' ' + address2;
     if(address3.size()>0){
       record['住所2結合'] = record['住所2結合'] + ' ' + address3;
     }
-  }
-
-  //電話番号の配置
-  if(addressType1 == "なし"){
-    record['電話番号A'] = 'TEL:' + tel1;
-    record['電話番号B'] = '    ' + tel2;//フォント次第でずれる可能性あり
-    record['電話番号C'] = 'FAX:' + fax1;
-    record['電話番号D'] = 'FAX:' + fax2;
-  } else {
+    //電話番号の配置
     record['電話番号A'] = 'TEL:' + tel1;
     record['電話番号B'] = 'FAX:' + fax1;
     record['電話番号C'] = 'TEL:' + tel2;
