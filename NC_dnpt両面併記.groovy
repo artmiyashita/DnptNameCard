@@ -112,38 +112,57 @@ def myInjectionOne(cassette, record, labelList, imageTable) {
   postnum1 = record['郵便番号1'];
   address1 = record['住所1'];
   address12 = record['住所1-2'];
-  tel1 = record['電話番号1'];
-  fax1 = record['FAX番号1'];
-  tel1unit = tel1 + fax1;
-
   postnum2 = record['郵便番号2'];
   address2 = record['住所2'];
   address3 = record['住所3'];
+
+  tel1 = record['電話番号1'];
   tel2 = record['電話番号2'];
+  fax1 = record['FAX番号1'];
   fax2 = record['FAX番号2']
-  tel2unit = tel2 + fax2;
+  mobile = record['携帯電話番号']
   email = record['E-mail'];
+
+  if(addressType1 == "なし"){
+    tel1unit = tel1 + tel2;
+    tel2unit = fax1 + fax2;
+  } else {
+    tel1unit = tel1 + fax1;
+    tel2unit = tel2 + fax2;
+    if(tel1 == "" && mobile != ""){
+      tel1unit = mobile + fax1;
+    }
+  }
+
 
   //住所結合
   record['住所1結合'] = postnum1 + ' ' + address1;
+  record['住所2結合'] = postnum2 + ' ' + address2;
+
   if(addressType1 != "なし"){
     if(address12.size()>0){
-      address12 = ' ' + address12;
+      record['住所1結合'] = record['住所1結合'] + ' ' + address12;
     }
-    record['住所1結合'] = record['住所1結合'] + address12;
-  }
-
-  if(addressType1 != "なし"){
     if(address3.size()>0){
-      address3 = ' ' + address3;
+      record['住所2結合'] = record['住所2結合'] + ' ' + address3;
     }
-    record['住所2結合'] = postnum2 + ' ' + address2 + address3;
   }
 
-  record['電話番号A'] = record['電話番号1'];
-  record['電話番号B'] = record['FAX番号1'];
-  record['電話番号C'] = record['電話番号2'];
-  record['電話番号D'] = record['FAX番号2'];
+  //電話番号の配置
+  if(addressType1 == "なし"){
+    record['電話番号A'] = 'TEL:' + tel1;
+    record['電話番号B'] = '    ' + tel2;//フォント次第でずれる可能性あり
+    record['電話番号C'] = 'FAX:' + fax1;
+    record['電話番号D'] = 'FAX:' + fax2;
+  } else {
+    record['電話番号A'] = 'TEL:' + tel1;
+    record['電話番号B'] = 'FAX:' + fax1;
+    record['電話番号C'] = 'TEL:' + tel2;
+    record['電話番号D'] = 'FAX:' + fax2;
+    if(tel1 == "" && mobile != ""){
+      record['電話番号A'] = '携帯:' + mobile;
+    }
+  }
 
   //基本関数
   labelList.each {
@@ -178,13 +197,14 @@ def myInjectionOne(cassette, record, labelList, imageTable) {
     pAddress12 = getPartsByLabel('住所1-2',1,cassette);
     pAddressUnit2 = getPartsByLabel('住所2結合',1,cassette);
 
-    pTel1 = getPartsByLabel('電話番号A',1,cassette);
+    pTelA = getPartsByLabel('電話番号A',1,cassette);
+    pTelB = getPartsByLabel('電話番号B',1,cassette);
+    pTelC = getPartsByLabel('電話番号C',1,cassette);
+    pTelD = getPartsByLabel('電話番号D',1,cassette);
+
     pTel1Type = getPartsByLabel('電話1種別',1,cassette);
-    pFax1 = getPartsByLabel('電話番号B',1,cassette);
-    pTel2 = getPartsByLabel('電話番号C',1,cassette);
     pTel2Type = getPartsByLabel('電話2種別',1,cassette);
-    pFax2 = getPartsByLabel('電話番号D',1,cassette);
-    
+
     pEmail = getPartsByLabel('E-mail',1,cassette);
 
     //字取り定義
@@ -256,16 +276,16 @@ def myInjectionOne(cassette, record, labelList, imageTable) {
     //住所配置
     if(addressType1 == "なし"){
       pAddressUnit2.setDisplay('none');
-      recordList = [addressType1,address1,address12,tel1,tel2unit,email];
-      partsList = [pAddressType1,pAddressUnit1,pAddress12,pTel1,pTel2,pEmail];
+      recordList = [addressType1,address1,address12,tel1unit,tel2unit,email];
+      partsList = [pAddressType1,pAddressUnit1,pAddress12,pTelA,pTelC,pEmail];
       linespan = 0;
       lineheight = 2.75;
       positionY = 55 - 7.68;
       paragraphBuilder(recordList,partsList,positionY,linespan,lineheight);
     }else{
       pAddress12.param.text = '';
-      recordList = [addressType1,address1,tel1,address2,tel2unit,email];
-      partsList = [pAddressType1,pAddressUnit1,pTel1,pAddressUnit2,pTel2,pEmail];
+      recordList = [addressType1,address1,tel1unit,address2,tel2unit,email];
+      partsList = [pAddressType1,pAddressUnit1,pTelA,pAddressUnit2,pTelC,pEmail];
       linespan = 0;
       lineheight = 2.75;
       positionY = 55 - 7.68;
@@ -273,32 +293,57 @@ def myInjectionOne(cassette, record, labelList, imageTable) {
     }
 
     //電話番号配置
-    pTel1Type.transform.translateX = pTel1.transform.translateX + pTel1.boundBox.width;
-    pTel1Type.transform.translateY = pTel1.transform.translateY;
-    pTel2Type.transform.translateX = pTel2.transform.translateX + pTel2.boundBox.width;
-    pTel2Type.transform.translateY = pTel2.transform.translateY;
+    pTelB.transform.translateX = 60;
+    pTelB.transform.translateY = pTelA.transform.translateY;
+    pTelD.transform.translateX = 60;
+    pTelD.transform.translateY = pTelC.transform.translateY;
 
-    //FAX配置
-    pFax1.transform.translateX = 60;
-    pFax1.transform.translateY = pTel1.transform.translateY;
-    pFax2.transform.translateX = 60;
-    pFax2.transform.translateY = pTel2.transform.translateY;
+    if(addressType1 == "なし"){
+      pTel1Type.transform.translateX = pTelA.transform.translateX + pTelA.boundBox.width;
+      pTel1Type.transform.translateY = pTelA.transform.translateY;
+      pTel2Type.transform.translateX = pTelB.transform.translateX + pTelB.boundBox.width;
+      pTel2Type.transform.translateY = pTelB.transform.translateY;
+    } else {
+      pTel1Type.transform.translateX = pTelA.transform.translateX + pTelA.boundBox.width;
+      pTel1Type.transform.translateY = pTelA.transform.translateY;
+      pTel2Type.transform.translateX = pTelC.transform.translateX + pTelC.boundBox.width;
+      pTel2Type.transform.translateY = pTelC.transform.translateY;
+    }
 
 
     //非表示処理
-    if(tel1==''){
-      pTel1.setDisplay('none');
-      pTel1Type.setDisplay('none');
-    }
-    if(tel2==''){
-      pTel2.setDisplay('none');
-      pTel2Type.setDisplay('none');
-    }
-    if(fax1==''){
-      pFax1.setDisplay('none');
-    }
-    if(fax2==''){
-      pFax2.setDisplay('none');
+    if(addressType1 == "なし"){
+      if(tel1==''){
+        pTelA.setDisplay('none');
+        pTel1Type.setDisplay('none');
+      }
+      if(tel2==''){
+        pTelB.setDisplay('none');
+        pTel2Type.setDisplay('none');
+      }
+      if(fax1==''){
+        pTelC.setDisplay('none');
+      }
+      if(fax2==''){
+        pTelD.setDisplay('none');
+      }
+    } else {
+      if(tel1==''){
+        if(mobile ==''){
+          pTelA.setDisplay('none');
+        }
+        pTel1Type.setDisplay('none');
+      }
+      if(tel2==''){
+        pTelC.setDisplay('none');
+        pTel2Type.setDisplay('none');
+      }
+      if(fax1==''){
+        pTelB.setDisplay('none');
+      }
+      if(fax2==''){
+        pTelD.setDisplay('none');
+      }
     }
 
   }
