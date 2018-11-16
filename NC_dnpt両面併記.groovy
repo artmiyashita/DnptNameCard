@@ -416,9 +416,10 @@ def myInjectionOne(cassette, record, labelList, imageTable) {
     pTelEnD.transform.translateX = pTelEnC.transform.translateX + pTelEnC.boundBox.width;
     pTelEnD.transform.translateY = pTelEnC.transform.translateY;
 
-    pClassEn2.transform.translateY = pClassEn1.transform.translateY;
 
 /*
+    pClassEn2.transform.translateY = pClassEn1.transform.translateY;//これを記述すると動かない
+
     recordList = [classEn1,classEn2,classEn3,classEn4];
     partsList = [pClassEn1,pClassEn2,pClassEn3,pClassEn4];
     linespan = 0;
