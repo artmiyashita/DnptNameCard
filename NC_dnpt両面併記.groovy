@@ -24,6 +24,24 @@ def paragraphBuilder(recordList,partsList,positionY,linespan,lineheight){
   }
 }
 
+//段落自動取詰(上基準)メソッド
+linespan = 0;//mm
+lineheight = 0;//mm
+positionY = 0;//mm
+positionX = 0;//mm
+def paragraphBuilder2(recordList,partsList,positionY,linespan,lineheight){
+  x = recordList.size();
+  for(i=0; i<x; i++){
+    partsList[i].transform.translateY = positionY + linespan;
+    if(recordList[i]==''){
+      partsList[i].setDisplay("none");
+      linespan += 0;
+    }else{
+      linespan += lineheight;
+    }
+  }
+}
+
 // 字取りメソッド
 def jidoriBuilder(jidori,sei,mei,pSei,pMei,span,positionX){
   j = jidori.size() - 1;
@@ -98,12 +116,17 @@ def rubyMaker(pNameRuby,nameRuby,pName,searchWord,rubySpan,rubySize,rubyFont,jid
 //独自の刺し込み処理
 def myInjectionOne(cassette, record, labelList, imageTable) {
 
-  def additionalLabelList = ['名称2','名称3','住所1結合','住所2結合','電話番号A','電話番号B','電話番号C','電話番号D'];
+  def additionalLabelList = ['名称2','名称3','住所1結合','住所2結合',
+  '電話番号A','電話番号B','電話番号C','電話番号D','電話番号英A','電話番号英B','電話番号英C','電話番号英D'];
 
   class1 = record['肩書き1'];
   class2 = record['肩書き2'];
   class3 = record['肩書き3'];
   class4 = record['肩書き4'];
+  classEn1 = record['肩書き英字1'];
+  classEn2 = record['肩書き英字2'];
+  classEn3 = record['肩書き英字3'];
+  classEn4 = record['肩書き英字4'];
   sei = record['姓'];
   mei = record['名'];
   seiruby = record['姓ルビ'];
@@ -124,6 +147,28 @@ def myInjectionOne(cassette, record, labelList, imageTable) {
   mobile = record['携帯電話番号']
   email = record['E-mail'];
 
+  if(tel1){
+    telEn1 = "+81-" + tel1.substring(0,tel1.size());
+  }else{
+    telEn1 = "";
+  }
+  if(tel2){
+    telEn2 = "+81-" + tel2.substring(0,tel2.size());
+  }else{
+    telEn2 = "";
+  }
+  if(fax1){
+    faxEn1 = "+81-" + fax1.substring(0,fax1.size());
+  }else{
+    faxEn1 = "";
+  }
+  if(fax2){
+    faxEn2 = "+81-" + fax2.substring(0,fax2.size());
+  }else{
+    faxEn2 = "";
+  }
+
+
   if(addressType1 == "なし"){
     //行数判定用電話結合
     tel1unit = tel1 + tel2;
@@ -135,6 +180,11 @@ def myInjectionOne(cassette, record, labelList, imageTable) {
     record['電話番号B'] = '    ' + tel2;//フォント次第でずれる可能性あり
     record['電話番号C'] = 'FAX:' + fax1;
     record['電話番号D'] = 'FAX:' + fax2;
+
+    record['電話番号英A'] = 'TEL:' + telEn1;
+    record['電話番号英B'] = '    ' + telEn2;//フォント次第でずれる可能性あり
+    record['電話番号英C'] = 'FAX:' + faxEn1;
+    record['電話番号英D'] = 'FAX:' + faxEn2;
 
   } else {
     //行数判定用電話結合
@@ -159,6 +209,13 @@ def myInjectionOne(cassette, record, labelList, imageTable) {
     record['電話番号D'] = 'FAX:' + fax2;
     if(tel1 == "" && mobile != ""){
       record['電話番号A'] = '携帯:' + mobile;
+    }
+    record['電話番号英A'] = 'TEL:' + telEn1;
+    record['電話番号英B'] = 'FAX:' + faxEn1;
+    record['電話番号英C'] = '';
+    record['電話番号英D'] = '';
+    if(tel1 == "" && mobile != ""){
+      record['電話番号英A'] = 'TEL:' + mobile;
     }
   }
 
@@ -344,5 +401,50 @@ def myInjectionOne(cassette, record, labelList, imageTable) {
       }
     }
 
+  }else{
+    pClassEn1 = getPartsByLabel("肩書き英字1",1,cassette);
+    pClassEn2 = getPartsByLabel("肩書き英字2",1,cassette);
+    pClassEn3 = getPartsByLabel("肩書き英字3",1,cassette);
+    pClassEn4 = getPartsByLabel("肩書き英字4",1,cassette);
+    pTelEnA = getPartsByLabel("電話番号英A",1,cassette);
+    pTelEnB = getPartsByLabel("電話番号英B",1,cassette);
+    pTelEnC = getPartsByLabel("電話番号英C",1,cassette);
+    pTelEnD = getPartsByLabel("電話番号英D",1,cassette);
+
+    pTelEnB.transform.translateX = pTelEnA.transform.translateX + pTelEnA.boundBox.width;
+    pTelEnB.transform.translateY = pTelEnA.transform.translateY;
+    pTelEnD.transform.translateX = pTelEnC.transform.translateX + pTelEnC.boundBox.width;
+    pTelEnD.transform.translateY = pTelEnC.transform.translateY;
+
+    pClassEn2.transform.translateY = pClassEn1.transform.translateY;
+
+/*
+    recordList = [classEn1,classEn2,classEn3,classEn4];
+    partsList = [pClassEn1,pClassEn2,pClassEn3,pClassEn4];
+    linespan = 0;
+    lineheight = 2.82;
+    positionY = 20;
+    paragraphBuilder2(recordList,partsList,positionY,linespan,lineheight);
+
+
+    //住所配置
+    if(addressType1 == "なし"){
+      pAddressUnit2.setDisplay('none');
+      recordList = [addressType1,address1,address12,tel1unit,tel2unit,email];
+      partsList = [pAddressType1,pAddressUnit1,pAddress12,pTelA,pTelC,pEmail];
+      linespan = 0;
+      lineheight = 2.75;
+      positionY = 55 - 7.68;
+      paragraphBuilder(recordList,partsList,positionY,linespan,lineheight);
+    }else{
+      pAddress12.param.text = '';
+      recordList = [addressType1,address1,tel1unit,address2,tel2unit,email];
+      partsList = [pAddressType1,pAddressUnit1,pTelA,pAddressUnit2,pTelC,pEmail];
+      linespan = 0;
+      lineheight = 2.75;
+      positionY = 55 - 7.68;
+      paragraphBuilder(recordList,partsList,positionY,linespan,lineheight);
+    }
+*/
   }
 }
