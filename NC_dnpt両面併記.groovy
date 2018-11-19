@@ -139,6 +139,8 @@ def myInjectionOne(cassette, record, labelList, imageTable) {
   postnum2 = record['郵便番号2'];
   address2 = record['住所2'];
   address3 = record['住所3'];
+  addressEn1 = record['住所1英字'];
+  addressEn12 = record['住所1-2英字'];
 
   tel1 = record['電話番号1'];
   tel2 = record['電話番号2'];
@@ -243,23 +245,18 @@ def myInjectionOne(cassette, record, labelList, imageTable) {
     pMei = getPartsByLabel('名', 1, cassette);
     pSeiRuby = getPartsByLabel('姓ルビ', 1, cassette);
     pMeiRuby = getPartsByLabel('名ルビ', 1, cassette);
-
     pAddressType1 = getPartsByLabel('名称1',1,cassette);
     pAddressType2 = getPartsByLabel('名称2',1,cassette);
     pAddressType3 = getPartsByLabel('名称3',1,cassette);
-
     pAddressUnit1 = getPartsByLabel('住所1結合',1,cassette);
     pAddress12 = getPartsByLabel('住所1-2',1,cassette);
     pAddressUnit2 = getPartsByLabel('住所2結合',1,cassette);
-
     pTelA = getPartsByLabel('電話番号A',1,cassette);
     pTelB = getPartsByLabel('電話番号B',1,cassette);
     pTelC = getPartsByLabel('電話番号C',1,cassette);
     pTelD = getPartsByLabel('電話番号D',1,cassette);
-
     pTel1Type = getPartsByLabel('電話1種別',1,cassette);
     pTel2Type = getPartsByLabel('電話2種別',1,cassette);
-
     pEmail = getPartsByLabel('E-mail',1,cassette);
 
     //字取り定義
@@ -410,15 +407,13 @@ def myInjectionOne(cassette, record, labelList, imageTable) {
     pTelEnB = getPartsByLabel("電話番号英B",1,cassette);
     pTelEnC = getPartsByLabel("電話番号英C",1,cassette);
     pTelEnD = getPartsByLabel("電話番号英D",1,cassette);
-
-    pTelEnB.transform.translateX = pTelEnA.transform.translateX + pTelEnA.boundBox.width;
-    pTelEnB.transform.translateY = pTelEnA.transform.translateY;
-    pTelEnD.transform.translateX = pTelEnC.transform.translateX + pTelEnC.boundBox.width;
-    pTelEnD.transform.translateY = pTelEnC.transform.translateY;
+    pAddressEn1 = getPartsByLabel("住所1英字",1,cassette);
+    pAddressEn12 = getPartsByLabel("住所1-2英字",1,cassette);
+    pEmail = getPartsByLabel('E-mail',1,cassette);
 
     pTest = getPartsByLabel("test",1,cassette);
-    pTest.param.text = pClassEn1.transform.translateY;
-
+    pTest.param.text = addressEn12;
+    pTest.setDisplay('none');
 
     recordList = [classEn1,classEn2,classEn3,classEn4];
     partsList = [pClassEn1,pClassEn2,pClassEn3,pClassEn4];
@@ -427,25 +422,27 @@ def myInjectionOne(cassette, record, labelList, imageTable) {
     positionY = 20;
     paragraphBuilder2(recordList,partsList,positionY,linespan,lineheight);
 
-
     //住所配置
     if(addressType1 == "なし"){
-      pAddressUnit2.setDisplay('none');
-      recordList = [addressType1,address1,address12,tel1unit,tel2unit,email];
-      partsList = [pAddressType1,pAddressUnit1,pAddress12,pTelA,pTelC,pEmail];
+      recordList = [addressEn1,addressEn12,tel1unit,tel2unit,email];
+      partsList = [pAddressEn1,pAddressEn12,pTelEnA,pTelEnC,pEmail];
       linespan = 0;
       lineheight = 2.75;
       positionY = 55 - 7.68;
       paragraphBuilder(recordList,partsList,positionY,linespan,lineheight);
     }else{
-      pAddress12.param.text = '';
-      recordList = [addressType1,address1,tel1unit,address2,tel2unit,email];
-      partsList = [pAddressType1,pAddressUnit1,pTelA,pAddressUnit2,pTelC,pEmail];
+      recordList = [addressEn1,addressEn12,tel1unit,tel2unit,email];
+      partsList = [pAddressEn1,pAddressEn12,pTelEnA,pTelEnC,pEmail];
       linespan = 0;
       lineheight = 2.75;
       positionY = 55 - 7.68;
       paragraphBuilder(recordList,partsList,positionY,linespan,lineheight);
     }
+
+    pTelEnB.transform.translateX = pTelEnA.transform.translateX + pTelEnA.boundBox.width;
+    pTelEnB.transform.translateY = pTelEnA.transform.translateY;
+    pTelEnD.transform.translateX = pTelEnC.transform.translateX + pTelEnC.boundBox.width;
+    pTelEnD.transform.translateY = pTelEnC.transform.translateY;
 
   }
 }
