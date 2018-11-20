@@ -146,6 +146,8 @@ def myInjectionOne(cassette, record, labelList, imageTable) {
   tel2 = record['電話番号2'];
   fax1 = record['FAX番号1'];
   fax2 = record['FAX番号2']
+  tel1Type = ['電話1種別'];
+  tel2Type = ['電話2種別'];
   mobile = record['携帯電話番号']
   email = record['E-mail'];
 
@@ -169,9 +171,19 @@ def myInjectionOne(cassette, record, labelList, imageTable) {
   }else{
     faxEn2 = "";
   }
-
+  if(tel1Type){
+    telEn1Type = "(Direct)";
+  }else{
+    telEn1Type = "";
+  }
+    if(tel2Type){
+    telEn2Type = "(Main)";
+  }else{
+    telEn2Type = "";
+  }
 
   if(addressType1 == "なし"){
+    //住所通常用の記述
     //行数判定用電話結合
     tel1unit = tel1 + tel2;
     tel2unit = fax1 + fax2;
@@ -183,12 +195,13 @@ def myInjectionOne(cassette, record, labelList, imageTable) {
     record['電話番号C'] = 'FAX:' + fax1;
     record['電話番号D'] = 'FAX:' + fax2;
 
-    record['電話番号英A'] = 'TEL:' + telEn1;
-    record['電話番号英B'] = '    ' + telEn2;//フォント次第でずれる可能性あり
+    record['電話番号英A'] = 'TEL:' + telEn1 + telEn1Type;
+    record['電話番号英B'] = '    ' + telEn2 + telEn2Type;//フォント次第でずれる可能性あり
     record['電話番号英C'] = 'FAX:' + faxEn1;
     record['電話番号英D'] = 'FAX:' + faxEn2;
 
   } else {
+    //住所併記用の記述
     //行数判定用電話結合
     tel1unit = tel1 + fax1;
     tel2unit = tel2 + fax2;
@@ -212,12 +225,16 @@ def myInjectionOne(cassette, record, labelList, imageTable) {
     if(tel1 == "" && mobile != ""){
       record['電話番号A'] = '携帯:' + mobile;
     }
-    record['電話番号英A'] = 'TEL:' + telEn1;
+    record['電話番号英A'] = 'TEL:' + telEn1 + telEn1Type;
     record['電話番号英B'] = 'FAX:' + faxEn1;
     record['電話番号英C'] = '';
     record['電話番号英D'] = '';
     if(tel1 == "" && mobile != ""){
       record['電話番号英A'] = 'TEL:' + mobile;
+    }
+    if(email == 'Kameo-Y@mail.co.jp'){
+      record['電話番号英A'] = 'TEL:' + telEn1;
+      record['電話番号英B'] = 'FAX:' + faxEn2;
     }
   }
 
@@ -430,19 +447,39 @@ def myInjectionOne(cassette, record, labelList, imageTable) {
       lineheight = 2.75;
       positionY = 55 - 7.68;
       paragraphBuilder(recordList,partsList,positionY,linespan,lineheight);
+
+      pTelEnB.transform.translateX = 55;
+      pTelEnB.transform.translateY = pTelEnA.transform.translateY;
+      pTelEnD.transform.translateX = 55;
+      pTelEnD.transform.translateY = pTelEnC.transform.translateY;
+
     }else{
-      recordList = [addressEn1,addressEn12,tel1unit,tel2unit,email];
-      partsList = [pAddressEn1,pAddressEn12,pTelEnA,pTelEnC,pEmail];
+      pTelEnC.setDisplay('none');
+      pTelEnD.setDisplay('none');
+      recordList = [addressEn1,addressEn12,tel1unit,email];
+      partsList = [pAddressEn1,pAddressEn12,pTelEnA,pEmail];
       linespan = 0;
       lineheight = 2.75;
       positionY = 55 - 7.68;
       paragraphBuilder(recordList,partsList,positionY,linespan,lineheight);
+
+      pTelEnB.transform.translateX = 60;
+      pTelEnB.transform.translateY = pTelEnA.transform.translateY;
     }
 
-    pTelEnB.transform.translateX = pTelEnA.transform.translateX + pTelEnA.boundBox.width;
-    pTelEnB.transform.translateY = pTelEnA.transform.translateY;
-    pTelEnD.transform.translateX = pTelEnC.transform.translateX + pTelEnC.boundBox.width;
-    pTelEnD.transform.translateY = pTelEnC.transform.translateY;
 
+/*
+    if(addressType1 == "なし"){
+      pTel1Type.transform.translateX = pTelA.transform.translateX + pTelA.boundBox.width;
+      pTel1Type.transform.translateY = pTelA.transform.translateY;
+      pTel2Type.transform.translateX = pTelB.transform.translateX + pTelB.boundBox.width;
+      pTel2Type.transform.translateY = pTelB.transform.translateY;
+    } else {
+      pTel1Type.transform.translateX = pTelA.transform.translateX + pTelA.boundBox.width;
+      pTel1Type.transform.translateY = pTelA.transform.translateY;
+      pTel2Type.transform.translateX = pTelC.transform.translateX + pTelC.boundBox.width;
+      pTel2Type.transform.translateY = pTelC.transform.translateY;
+    }
+*/
   }
 }
